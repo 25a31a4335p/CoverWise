@@ -12,13 +12,28 @@ import type {
   SafeAppointmentSummary,
 } from "../types";
 
-const API_BASE_URL = "http://127.0.0.1:8000";
+/**
+ * Resolves the backend API base URL dynamically:
+ * - Checks for Vite environment variable VITE_API_BASE_URL (configured in Vercel or local .env)
+ * - Trims whitespace and strips any trailing slash
+ * - Falls back to local development server (http://127.0.0.1:8000)
+ */
+export function getApiBaseUrl(): string {
+  const envUrl = import.meta.env.VITE_API_BASE_URL;
+  if (envUrl && typeof envUrl === "string" && envUrl.trim() !== "") {
+    return envUrl.trim().replace(/\/+$/, "");
+  }
+  return "http://127.0.0.1:8000";
+}
+
+export const API_BASE_URL = getApiBaseUrl();
 
 /**
  * Fetch backend health status
  */
 export async function checkBackendHealth(): Promise<HealthResponse> {
-  const response = await fetch(`${API_BASE_URL}/health`);
+  const baseUrl = getApiBaseUrl();
+  const response = await fetch(`${baseUrl}/health`);
   if (!response.ok) {
     throw new Error(`Health check failed with status: ${response.status}`);
   }
@@ -31,7 +46,8 @@ export async function checkBackendHealth(): Promise<HealthResponse> {
 export async function calculateNeeds(
   payload: CalculationRequest
 ): Promise<CalculationResponse> {
-  const response = await fetch(`${API_BASE_URL}/api/calculate`, {
+  const baseUrl = getApiBaseUrl();
+  const response = await fetch(`${baseUrl}/api/calculate`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -66,7 +82,8 @@ export async function calculateNeeds(
 export async function createAppointment(
   payload: AppointmentCreateRequest
 ): Promise<AppointmentResponse> {
-  const response = await fetch(`${API_BASE_URL}/api/appointments`, {
+  const baseUrl = getApiBaseUrl();
+  const response = await fetch(`${baseUrl}/api/appointments`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -103,7 +120,8 @@ export async function createAppointment(
 export async function getAppointments(
   limit: number = 50
 ): Promise<SafeAppointmentSummary[]> {
-  const response = await fetch(`${API_BASE_URL}/api/appointments?limit=${limit}`);
+  const baseUrl = getApiBaseUrl();
+  const response = await fetch(`${baseUrl}/api/appointments?limit=${limit}`);
   if (!response.ok) {
     throw new Error(`Failed to fetch appointments with status: ${response.status}`);
   }

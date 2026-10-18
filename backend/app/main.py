@@ -3,6 +3,7 @@ CoverWise - Backend API Entry Point
 Intelligent Life Insurance Needs Finder & Digital Advisory Platform
 """
 
+import os
 import datetime
 import sqlite3
 from typing import List
@@ -49,15 +50,25 @@ app = FastAPI(
 init_db()
 
 # Configure CORS (Cross-Origin Resource Sharing)
-# This allows our React frontend running on localhost:5173 to communicate with this backend.
+# Supports local dev ports, dynamic Vercel domains, and ALLOWED_ORIGINS env var
 origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
+    "http://localhost:3000",
+    "http://localhost:4173",
 ]
+
+env_origins = os.getenv("ALLOWED_ORIGINS", "")
+if env_origins:
+    for o in env_origins.split(","):
+        cleaned = o.strip()
+        if cleaned and cleaned not in origins:
+            origins.append(cleaned)
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
+    allow_origin_regex=r"^https:\/\/.*\.vercel\.app$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

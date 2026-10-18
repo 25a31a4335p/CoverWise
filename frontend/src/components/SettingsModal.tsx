@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import type { HealthResponse } from "../types";
+import { getApiBaseUrl } from "../api/client";
 
 interface SettingsModalProps {
   isOpen: boolean;
@@ -113,6 +114,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     <span className="status-pill status-offline">Offline</span>
                   )}
                 </span>
+              </div>
+              <div className="info-row">
+                <span className="info-label">Active API Endpoint:</span>
+                <span className="info-value"><code>{getApiBaseUrl()}</code></span>
               </div>
               <div className="info-row">
                 <span className="info-label">API Framework:</span>
